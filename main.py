@@ -1,8 +1,22 @@
-from typing import Union
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
+from pydub import AudioSegment
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from os import path
 
 app = FastAPI()
+
+origins = [
+  "http://localhost:5173"
+]
+
+app.add_middleware(
+  CORSMiddleware,
+  allow_origins=origins,
+  allow_credentials=True,
+  allow_methods=["*"],
+  allow_headers=["*"]
+)
 
 class Item(BaseModel):
   name: str
@@ -30,3 +44,9 @@ def post_products(item: Item):
   itemList.append(item)
   return {"status": "ok", "message": "Product created successfully with id: " + str(itemList.index(item))}
 
+@app.post("/files")
+def post_files(file: UploadFile = File(...)):
+  if (file.filename.find(".wav") == -1):
+    output_file = AudioSegment.from_mp3(file.file)
+    output_file.export("output.wav", format="wav")
+  return {"status": "ok", "body": file.filename}
