@@ -48,5 +48,5 @@ def post_products(item: Item):
 def post_files(file: UploadFile = File(...)):
   if (file.filename.find(".wav") == -1):
     output_file = AudioSegment.from_mp3(file.file)
-    output_file.export("output.wav", format="wav")
+    output_file.export(f"{file.filename}.wav", format="wav")
   return {"status": "ok", "body": file.filename}
